@@ -2,9 +2,7 @@ pipeline {
     agent any
 
 
-    environment {
-        VIRTUAL_ENV = "venv"
-    }
+
 
     stages {
         stage("Git Clone") {
