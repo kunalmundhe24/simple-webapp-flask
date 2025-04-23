@@ -11,7 +11,7 @@ pipeline {
                 git(
                     credentialsId: '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',
                     branch: 'master',
-                    url: 'https://github.com/kunalmundhe24/CafeMgtNew.git'
+                    url: 'https://github.com/kunalmundhe24/simple-webapp-flask.git'
                 )
                 bat "dir /s"  // Debugging: List all files after cloning
             }
