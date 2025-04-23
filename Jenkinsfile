@@ -1,9 +1,6 @@
 pipeline {
     agent any
 
-
-
-
     stages {
         stage("Git Clone") {
             steps {
@@ -22,31 +19,32 @@ pipeline {
                     echo "🔹 Checking if Python is installed..."
                     python --version || exit /b 1
 
-                    echo "🔹 Creating virtual environment..."
-                    python -m venv venv
-
-                    echo "🔹 Activating virtual environment..."
-                    call venv\\Scripts\\activate
-
-                    echo "🔹 Checking if requirements.txt exists..."
-                    if not exist requirements.txt (
-                        echo "❌ ERROR: requirements.txt not found!"
-                        exit /b 1
+                    echo "🔹 Creating virtual environment if it doesn't exist..."
+                    if not exist venv (
+                        python -m venv venv
                     )
 
-                    echo "🔹 Upgrading pip and installing dependencies..."
-                    python -m pip install --upgrade pip
-                    python -m pip install -r requirements.txt
+                    echo "🔹 Activating virtual environment and installing dependencies..."
+                    call venv\\Scripts\\activate && (
+                        echo "🔹 Upgrading pip..."
+                        python -m pip install --upgrade pip
+
+                        if exist requirements.txt (
+                            echo "🔹 Installing from requirements.txt..."
+                            python -m pip install -r requirements.txt
+                        ) else (
+                            echo "❌ ERROR: requirements.txt not found!"
+                            exit /b 1
+                        )
+                    )
 
                     if errorlevel 1 (
-                        echo "❌ ERROR: Dependency installation failed!"
+                        echo "❌ ERROR: Setup failed!"
                         exit /b 1
                     )
                 '''
             }
         }
-
-        
 
         stage('Build & Deploy') {
             when {
@@ -55,16 +53,16 @@ pipeline {
             steps {
                 bat '''
                     echo "🚀 Deploying the app..."
-                    call venv\\Scripts\\activate
+                    call venv\\Scripts\\activate && (
+                        echo "🔹 Checking if app.py exists..."
+                        if not exist app.py (
+                            echo "❌ ERROR: app.py not found!"
+                            exit /b 1
+                        )
 
-                    echo "🔹 Checking if app.py exists..."
-                    if not exist app.py (
-                        echo "❌ ERROR: app.py not found!"
-                        exit /b 1
+                        echo "🔹 Starting Flask application..."
+                        python app.py
                     )
-
-                    echo "🔹 Starting Flask application..."
-                    python app.py
 
                     if errorlevel 1 (
                         echo "❌ ERROR: Failed to start Flask application!"
