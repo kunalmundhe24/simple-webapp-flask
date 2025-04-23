@@ -77,6 +77,23 @@ pipeline {
                 '''
             }
         }
+
+        stage('Docker Compose Deploy') {
+            steps {
+                bat '''
+                    echo 🐳 Building and running Docker container with Docker Compose...
+                    docker-compose down
+                    docker-compose up --build -d
+
+                    if errorlevel 1 (
+                        echo ❌ ERROR: Docker Compose failed!
+                        exit /b 1
+                    )
+
+                    echo ✅ Docker container is up and running!
+                '''
+            }
+        }
     }
 
     post {
