@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    tools {
+        git "Default"
+    }
+
     environment {
         VIRTUAL_ENV = "venv"
     }
